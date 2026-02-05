@@ -1,6 +1,7 @@
 package com.shopping.musinsabackend.domain.user.controller;
 
 import com.shopping.musinsabackend.domain.user.dto.request.SignUpRequest;
+import com.shopping.musinsabackend.domain.user.dto.response.InfoResponse;
 import com.shopping.musinsabackend.domain.user.dto.response.SignUpResponse;
 import com.shopping.musinsabackend.domain.user.service.UserService;
 import com.shopping.musinsabackend.global.response.BaseResponse;
@@ -39,10 +40,22 @@ public class UserController {
     public ResponseEntity<BaseResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
         // 서비스 호출
-        userService.deleteUser(userDetails.getUsername());
+        userService.deleteUser(userDetails.getUsername()); // CustomUserDetails를 보면 getUsername()을 호출하면 getEmail이 실행
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "회원 탈퇴가 완료되었습니다.", null));
+    }
+
+    // 회원 정보 조회 API
+    @Operation(summary = "회원 정보 조회", description = "사용자 정보 조회 API")
+    @GetMapping("/my-info")
+    public ResponseEntity<BaseResponse<InfoResponse>> myInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        // 서비스 호출
+        InfoResponse userInfo = userService.infoUser(userDetails.getUsername());
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "내 정보 조회 성공", userInfo));
     }
 }
 
