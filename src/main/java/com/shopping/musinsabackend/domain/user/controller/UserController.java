@@ -39,7 +39,7 @@ public class UserController {
     public ResponseEntity<BaseResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
         // 서비스 호출
-        userService.deleteUser(userDetails.getUsername());
+        userService.deleteUser(userDetails.getUsername()); // CustomUserDetails를 보면 getUsername()을 호출하면 getEmail이 실행
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "회원 탈퇴가 완료되었습니다.", null));
