@@ -52,6 +52,7 @@ public class UserService {
     @Transactional
     public void deleteUser(String email) {
         // 유저 조회
+        // UserEntity 객체 user 생성
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
         // 유저 삭제
