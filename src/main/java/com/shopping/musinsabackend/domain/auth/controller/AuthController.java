@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auths") // 참고 코드의 경로 따름
-@Tag(name = "Auth", description = "Auth 관리 API")
+@Tag(name = "Auth", description = "Auth 관련 API")
 public class AuthController {
 
     private final AuthService authService;
