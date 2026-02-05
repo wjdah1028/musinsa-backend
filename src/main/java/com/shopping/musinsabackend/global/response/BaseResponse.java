@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(title = "BaseResponse DTO", description = "공통 API 응답 형식")
-public class BaseResponse<T> {
+public class BaseResponse<T> { // 응답 클래스
 
     @Schema(description = "요청 성공 여부", example = "true")
     private boolean success;
@@ -29,6 +29,10 @@ public class BaseResponse<T> {
 
     public static <T> BaseResponse<T> success(String message, T data) {
         return new BaseResponse<>(true, 200, message, data);
+    }
+
+    public static <T> BaseResponse<T> success(int code, String message, T data) {
+        return new BaseResponse<>(true, code, message, data);
     }
 
     public static <T> BaseResponse<T> error(int code, String message) {
