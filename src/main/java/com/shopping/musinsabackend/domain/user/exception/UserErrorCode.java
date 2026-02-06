@@ -11,6 +11,8 @@ public enum UserErrorCode implements BaseErrorCode {
 
     // 에러 정의
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "중복된 이메일입니다."),
+    PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+    PASSWORD_SAME(HttpStatus.BAD_REQUEST, "기존 비밀번호와 일치합니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다.");
 
     private final HttpStatus status; // HTTP 상태 코드

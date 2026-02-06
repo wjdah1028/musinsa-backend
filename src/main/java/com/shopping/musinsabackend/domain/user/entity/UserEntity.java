@@ -67,4 +67,20 @@ public class UserEntity extends BaseTimeEntity {
     public void expireRefreshToken() {
         this.refreshToken = null;
     }
+
+    // 기본적인 회원 정보 수정
+    public void updateUserInfo(String name, LocalDate age, Gender gender, String phone, String zipcode, String address, String addressDetail) {
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+        this.phone = phone;
+        this.zipcode = zipcode;
+        this.address = address;
+        this.addressDetail = addressDetail;
+    }
+
+    // 비밀번호 변경
+    public void updateUserPw(String encryptedPassword) {
+        this.password = encryptedPassword;
+    }
 }

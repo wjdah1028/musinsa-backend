@@ -1,6 +1,8 @@
 package com.shopping.musinsabackend.domain.user.controller;
 
 import com.shopping.musinsabackend.domain.user.dto.request.SignUpRequest;
+import com.shopping.musinsabackend.domain.user.dto.request.UpdatePwInfoRequest;
+import com.shopping.musinsabackend.domain.user.dto.request.UpdateUserInfoRequest;
 import com.shopping.musinsabackend.domain.user.dto.response.InfoResponse;
 import com.shopping.musinsabackend.domain.user.dto.response.SignUpResponse;
 import com.shopping.musinsabackend.domain.user.service.UserService;
@@ -12,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -56,6 +59,30 @@ public class UserController {
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "내 정보 조회 성공", userInfo));
+    }
+
+    // 회원 정보 수정 API
+    @Operation(summary = "회원 정보 수정", description = "사용자 정보 수정 API")
+    @PatchMapping("/update-info")
+    public ResponseEntity<BaseResponse<Void>> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid UpdateUserInfoRequest request) {
+
+        // 서비스 호출
+        userService.updateUserInfo(userDetails.getUsername(), request);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "회원 정보가 수정되었습니다.", null));
+    }
+
+    // 비밀번호 변경 API
+    @Operation(summary = "비밀번호 수정", description = "사용자 비밀번호 수정 API")
+    @PatchMapping("/update-pw")
+    public ResponseEntity<BaseResponse<Void>> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid UpdatePwInfoRequest request) {
+
+        // 서비스 호출
+        userService.updateUserPw(userDetails.getUsername(), request);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "비밀번호가 변경되었습니다.", null));
     }
 }
 
