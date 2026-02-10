@@ -9,9 +9,10 @@ import org.springframework.stereotype.Component;
 public class CategoryCreateMapper {
 
     // Request DTO -> Entity 변환
-    public CategoryEntity toEntity(CategoryCreateRequest request) {
+    public CategoryEntity toEntity(CategoryCreateRequest request, CategoryEntity parent) {
         return CategoryEntity.builder()
                 .categoryName(request.getCategoryName())
+                .parent(parent)
                 .build();
     }
 
