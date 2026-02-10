@@ -2,11 +2,13 @@ package com.shopping.musinsabackend.domain.product.service;
 
 import com.shopping.musinsabackend.domain.product.dto.request.ProductCreateRequest;
 import com.shopping.musinsabackend.domain.product.dto.response.ProductCreateResponse;
+import com.shopping.musinsabackend.domain.product.dto.response.ProductReadResponse;
 import com.shopping.musinsabackend.domain.product.entity.BrandEntity;
 import com.shopping.musinsabackend.domain.product.entity.CategoryEntity;
 import com.shopping.musinsabackend.domain.product.entity.ProductEntity;
 import com.shopping.musinsabackend.domain.product.exception.ProductErrorCode;
 import com.shopping.musinsabackend.domain.product.mapper.ProductCreateMapper;
+import com.shopping.musinsabackend.domain.product.mapper.ProductReadMapper;
 import com.shopping.musinsabackend.domain.product.repository.BrandRepository;
 import com.shopping.musinsabackend.domain.product.repository.CategoryRepository;
 import com.shopping.musinsabackend.domain.product.repository.ProductRepository;
@@ -19,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,7 +35,9 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductCreateMapper productCreateMapper;
     private final S3Service s3Service;
+    private final ProductReadMapper productReadMapper;
 
+    // 상품 등록
     public ProductCreateResponse createProduct(ProductCreateRequest request, MultipartFile image) {
 
         // 상품 중복 검사
@@ -63,5 +70,27 @@ public class ProductService {
 
         // 응답 반환
         return productCreateMapper.toResponse(savedProduct);
+    }
+
+    // 상품 전체 조회
+    public List<ProductReadResponse> allProductList() {
+
+        // DB에서 조회
+        List<ProductEntity> productList = productRepository.findAll();
+
+        // Entity -> DTO 변환
+        return productList.stream()
+                .map(productReadMapper::toResponse).collect(Collectors.toList());
+    }
+
+    // 상품 상세 조회
+    public ProductReadResponse productInfo(Long productId) {
+
+        // 유저 조회
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+        // Entity -> DTO 변환
+        return productReadMapper.toResponse(product);
     }
 }
