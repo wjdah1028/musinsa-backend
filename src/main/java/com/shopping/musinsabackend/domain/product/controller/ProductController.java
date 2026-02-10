@@ -61,4 +61,15 @@ public class ProductController {
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "상품 상세 조회 성공", response));
     }
+
+    @Operation(summary = "상품 삭제 API")
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<BaseResponse<Void>> deleteProduct(@PathVariable Long productId) {
+
+        // 서비스 호출
+        productService.deleteProduct(productId);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "상품 삭제가 성공했습니다.", null));
+    }
 }
