@@ -78,6 +78,11 @@ public class ProductService {
         // DB에서 조회
         List<ProductEntity> productList = productRepository.findAll();
 
+        // 상품이 없으면 에러 메시지 출력
+        if (productList.isEmpty()) {
+            throw new CustomException(ProductErrorCode.PRODUCT_ALL_EXIST);
+        }
+
         // Entity -> DTO 변환
         return productList.stream()
                 .map(productReadMapper::toResponse).collect(Collectors.toList());
@@ -86,11 +91,41 @@ public class ProductService {
     // 상품 상세 조회
     public ProductReadResponse productInfo(Long productId) {
 
-        // 유저 조회
+        // 상품 조회
         ProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         // Entity -> DTO 변환
         return productReadMapper.toResponse(product);
+    }
+
+    // 상품 삭제
+    @Transactional
+    public void deleteProduct(Long productId) {
+
+        // 상품 조회
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+        // 이미지가 있으면 S3에서 삭제
+        if (product.getImage() != null) {
+            try {
+                String imageUrl = product.getImage();
+                String splitStr = ".com/"; // product/랜덤UUID만 추출
+
+                // .com 뒤에 있는 문자열 추출
+                String keyName = imageUrl.substring(imageUrl.lastIndexOf(splitStr) + splitStr.length());
+
+                s3Service.deleteFile(keyName);
+            }
+            catch (Exception e) {
+                log.error("S3 이미지 삭제 실패: {}", e.getMessage());
+            }
+        }
+
+        // 상품 삭제
+        productRepository.delete(product);
+
+        log.info("상품 및 이미지 삭제 완료: {}", productId);
     }
 }
