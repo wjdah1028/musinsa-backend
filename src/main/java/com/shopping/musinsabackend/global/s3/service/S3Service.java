@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.shopping.musinsabackend.global.config.S3Config;
+import com.shopping.musinsabackend.global.exception.CustomException;
 import com.shopping.musinsabackend.global.s3.dto.S3Response;
 import com.shopping.musinsabackend.global.s3.entity.PathName;
 import com.shopping.musinsabackend.global.s3.exception.S3ErrorCode;
@@ -48,13 +49,13 @@ public class S3Service {
 
         catch (Exception e) {
             log.error("S3 upload 중 오류 발생", e);
-            throw new RuntimeException(S3ErrorCode.FILE_SERVER_ERROR.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_SERVER_ERROR);
         }
     }
 
     public String base64UploadFile(PathName pathName, String base64Url) {
         if (!validateBase64(base64Url)) {
-            throw new RuntimeException(S3ErrorCode.INVALID_BASE64.getMessage());
+            throw new CustomException(S3ErrorCode.INVALID_BASE64);
         }
 
         String base64Data = base64Url;
@@ -81,7 +82,7 @@ public class S3Service {
         }
         catch (Exception e) {
             log.error("S3 upload 중 오류 발생", e);
-            throw new RuntimeException(S3ErrorCode.FILE_SERVER_ERROR.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_SERVER_ERROR);
         }
     }
 
@@ -99,7 +100,7 @@ public class S3Service {
         }
         catch (Exception e) {
             log.error("S3 오류 발생", e);
-            throw new RuntimeException(S3ErrorCode.FILE_SERVER_ERROR.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_SERVER_ERROR);
         }
     }
 
@@ -110,7 +111,7 @@ public class S3Service {
         }
         catch (Exception e) {
             log.error("S3 삭제 오류 발생", e);
-            throw new RuntimeException(S3ErrorCode.FILE_SERVER_ERROR.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_SERVER_ERROR);
         }
     }
 
@@ -120,16 +121,28 @@ public class S3Service {
             case REVIEW -> s3Config.getFolder2Path();
         };
 
+        List<String> fileList;
         try {
-            return amazonS3.listObjectsV2(new ListObjectsV2Request().withBucketName(s3Config.getBucket()).withPrefix(prefix))
+            // fileList에 담기
+            fileList = amazonS3.listObjectsV2(new ListObjectsV2Request().withBucketName(s3Config.getBucket()).withPrefix(prefix))
                     .getObjectSummaries()
                     .stream()
                     .map(obj -> amazonS3.getUrl(s3Config.getBucket(), obj.getKey()).toString())
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            log.error("S3 파일 목록 조회 중 오류 발생", e);
-            throw new RuntimeException(S3ErrorCode.FILE_SERVER_ERROR.getMessage());
+
+            // 에러 메세지 출력
         }
+        catch (Exception e) {
+            log.error("S3 파일 목록 조회 중 오류 발생", e);
+            throw new CustomException(S3ErrorCode.FILE_SERVER_ERROR);
+        }
+
+        if (fileList.isEmpty()) {
+            log.error("등록된 이미지 조회중 오류 발생");
+            throw new CustomException(S3ErrorCode.NO_IMAGE_EXIST);
+        }
+
+        return fileList;
     }
 
     public void deleteFile(PathName pathName, String fileName) {
@@ -143,17 +156,17 @@ public class S3Service {
 
     private void existFile(String keyName) {
         if (!amazonS3.doesObjectExist(s3Config.getBucket(), keyName)) {
-            throw new RuntimeException(S3ErrorCode.FILE_NOT_FOUND.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_NOT_FOUND);
         }
     }
 
     private void validateFile(MultipartFile file) {
         if (file.getSize() > 5 * 1024 * 1024) {
-            throw new RuntimeException(S3ErrorCode.FILE_SIZE_INVALID.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_SIZE_INVALID);
         }
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new RuntimeException(S3ErrorCode.FILE_TYPE_INVALID.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_TYPE_INVALID);
         }
     }
 
