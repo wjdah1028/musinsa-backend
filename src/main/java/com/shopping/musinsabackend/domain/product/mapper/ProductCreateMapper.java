@@ -5,20 +5,22 @@ import com.shopping.musinsabackend.domain.product.dto.response.ProductCreateResp
 import com.shopping.musinsabackend.domain.product.entity.BrandEntity;
 import com.shopping.musinsabackend.domain.product.entity.CategoryEntity;
 import com.shopping.musinsabackend.domain.product.entity.ProductEntity;
+import com.shopping.musinsabackend.domain.product.entity.ProductImageEntity; // 추가
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors; // 추가
 
 @Component
 public class ProductCreateMapper {
 
     // Request DTO -> Entity 변환
-    public ProductEntity toEntity(ProductCreateRequest request, BrandEntity brand, CategoryEntity category, String imageUrl) {
+    public ProductEntity toEntity(ProductCreateRequest request, BrandEntity brand, CategoryEntity category) {
         return ProductEntity.builder()
                 .productName(request.getProductName())
                 .productContent(request.getProductContent())
                 .price(request.getPrice())
                 .stock(request.getStock())
                 .gender(request.getGender())
-                .image(imageUrl)
                 .brand(brand)
                 .category(category)
                 .build();
@@ -33,7 +35,9 @@ public class ProductCreateMapper {
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .gender(product.getGender())
-                .imageUrl(product.getImage())
+                .imageUrls(product.getImages().stream()
+                        .map(ProductImageEntity::getImageUrl)
+                        .collect(Collectors.toList()))
                 .reviewCount(product.getReviewCount())
                 .productLike(product.getProductLike())
                 .brandName(product.getBrand().getBrandName())
