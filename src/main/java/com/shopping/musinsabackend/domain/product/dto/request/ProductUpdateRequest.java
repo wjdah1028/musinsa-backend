@@ -7,10 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
-@Schema(title = "상품 생성 DTO", description = "상품 등록을 위한 데이터")
-public class ProductCreateRequest {
+@Schema(title = "상품 정보 수정 Request DTO", description = "상품 수정")
+public class ProductUpdateRequest {
 
     @Schema(description = "상품 이름", example = "데일리 헨리넥 니트")
     @NotBlank(message = "상품 이름은 필수 입력 값입니다.")
@@ -38,4 +40,7 @@ public class ProductCreateRequest {
     @Schema(description = "상품 카테고리", example = "상의")
     @NotNull(message = "상품 카테고리는 필수 입력 값입니다.")
     private Long categoryId;
+
+    @Schema(description = "삭제할 URL 리스트", example = "http..")
+    private List<String> deletedImageUrls;
 }

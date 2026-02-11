@@ -68,4 +68,13 @@ public class GlobalExceptionHandler {
                 .badRequest()
                 .body(BaseResponse.error(400, "필수 헤더 정보(Authorization)가 누락되었습니다."));
     }
+
+    // JSON 파싱 에러 (아까 대괄호 [] 안 붙였을 때 나는 에러) 전용 처리기
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<BaseResponse<Object>> handleHttpMessageNotReadableException(
+            org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        log.error("JSON 파싱 오류 발생: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(BaseResponse.error(400, "입력 데이터 형식이 잘못되었습니다."));
+    }
 }

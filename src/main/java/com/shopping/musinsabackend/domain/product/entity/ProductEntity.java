@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "product")
 @Getter
@@ -45,8 +48,9 @@ public class ProductEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private int stock; // 상품 재고
 
-    @Column(nullable = false, length = 500)
-    private String image;
+    @Builder.Default
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImageEntity> images = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brandId", nullable = false)
@@ -55,4 +59,28 @@ public class ProductEntity extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoryId", nullable = false)
     private CategoryEntity category;
+
+    public void update(String productName, String productContent, Integer price, Integer stock, Gender gender, BrandEntity brand, CategoryEntity category) {
+        if (productName != null && !productName.isBlank()) {
+            this.productName = productName;
+        }
+        if (productContent != null) {
+            this.productContent = productContent;
+        }
+        if (price != null) {
+            this.price = price;
+        }
+        if (stock != null) {
+            this.stock = stock;
+        }
+        if (gender != null) {
+            this.gender = gender;
+        }
+        if (brand != null) {
+            this.brand = brand;
+        }
+        if (category != null) {
+            this.category = category;
+        }
+    }
 }

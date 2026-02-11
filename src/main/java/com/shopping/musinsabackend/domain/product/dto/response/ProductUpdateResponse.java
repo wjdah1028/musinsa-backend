@@ -1,5 +1,6 @@
 package com.shopping.musinsabackend.domain.product.dto.response;
 
+
 import com.shopping.musinsabackend.domain.user.entity.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -12,9 +13,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(title = "상품 등록 응답 DTO")
-public class ProductCreateResponse {
-
+@Schema(title = "상품 수정 응답 DTO")
+public class ProductUpdateResponse {
     @Schema(description = "상품 고유번호", example = "1")
     private Long productId;
 
@@ -48,6 +48,6 @@ public class ProductCreateResponse {
     @Schema(description = "상품 카테고리 이름", example = "상의")
     private String categoryName;
 
-    @Schema(description = "상품 등록 일시", example = "2026-02-09T10:00:00")
-    private LocalDateTime createdAt;
+    @Schema(description = "상품 수정 일시", example = "2026-02-09T10:00:00")
+    private LocalDateTime updatedAt;
 }
