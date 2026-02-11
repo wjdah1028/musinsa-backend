@@ -3,6 +3,8 @@ package com.shopping.musinsabackend.domain.product.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -25,4 +27,7 @@ public class ProductReadResponse {
 
     @Schema(description = "카테고리 이름", example = "맨투맨")
     private String categoryName;
+
+    @Schema(description = "상품 이미지 URL 리스트", example = "[\"https://s3...\", \"https://s3...\"]")
+    private List<String> imageUrls;
 }
