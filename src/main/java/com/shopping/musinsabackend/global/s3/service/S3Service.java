@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -180,6 +181,35 @@ public class S3Service {
         }
         catch (IllegalArgumentException e) {
             return false;
+        }
+    }
+
+    public void deleteFileUrl(String fileUrl) {
+        try {
+            // URL이 없으면 무시
+            if (fileUrl == null || fileUrl.isEmpty()) {
+                return;
+            }
+
+            // URL에서 .com/ 뒷부분만 추출
+            String splitStr = ".com/";
+            int index = fileUrl.lastIndexOf(splitStr);
+
+            if (index == -1) {
+                deleteFile(fileUrl);
+                return;
+            }
+
+            String keyName = fileUrl.substring(index + splitStr.length());
+
+            // 한글 파일명을 위해 디코딩
+            String decodedKeyName = java.net.URLDecoder.decode(keyName, StandardCharsets.UTF_8);
+
+            deleteFile(decodedKeyName);
+        }
+        catch (Exception e) {
+            log.error("S3 파일 삭제 중 오류 발생: {}", e.getMessage());
+            throw new CustomException(S3ErrorCode.FILE_SERVER_ERROR);
         }
     }
 }
