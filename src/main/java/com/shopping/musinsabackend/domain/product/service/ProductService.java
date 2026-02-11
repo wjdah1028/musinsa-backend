@@ -1,14 +1,18 @@
 package com.shopping.musinsabackend.domain.product.service;
 
 import com.shopping.musinsabackend.domain.product.dto.request.ProductCreateRequest;
+import com.shopping.musinsabackend.domain.product.dto.request.ProductUpdateRequest;
 import com.shopping.musinsabackend.domain.product.dto.response.ProductCreateResponse;
 import com.shopping.musinsabackend.domain.product.dto.response.ProductReadResponse;
+import com.shopping.musinsabackend.domain.product.dto.response.ProductUpdateResponse;
 import com.shopping.musinsabackend.domain.product.entity.BrandEntity;
 import com.shopping.musinsabackend.domain.product.entity.CategoryEntity;
 import com.shopping.musinsabackend.domain.product.entity.ProductEntity;
+import com.shopping.musinsabackend.domain.product.entity.ProductImageEntity;
 import com.shopping.musinsabackend.domain.product.exception.ProductErrorCode;
 import com.shopping.musinsabackend.domain.product.mapper.ProductCreateMapper;
 import com.shopping.musinsabackend.domain.product.mapper.ProductReadMapper;
+import com.shopping.musinsabackend.domain.product.mapper.ProductUpdateMapper;
 import com.shopping.musinsabackend.domain.product.repository.BrandRepository;
 import com.shopping.musinsabackend.domain.product.repository.CategoryRepository;
 import com.shopping.musinsabackend.domain.product.repository.ProductRepository;
@@ -36,9 +40,10 @@ public class ProductService {
     private final ProductCreateMapper productCreateMapper;
     private final S3Service s3Service;
     private final ProductReadMapper productReadMapper;
+    private final ProductUpdateMapper productUpdateMapper;
 
     // 상품 등록
-    public ProductCreateResponse createProduct(ProductCreateRequest request, MultipartFile image) {
+    public ProductCreateResponse createProduct(ProductCreateRequest request, List<MultipartFile> images) {
 
         // 상품 중복 검사
         if (productRepository.existsByProductName(request.getProductName())) {
@@ -53,17 +58,31 @@ public class ProductService {
         CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
 
-        // 이미지 S3 업로드 -> URL
-        String imageUrl = null;
-        if (image != null && !image.isEmpty()) {
-            imageUrl = s3Service.uploadFile(PathName.PRODUCT, image);
-        }
-
         // DTO -> Entity 변환
-        ProductEntity product = productCreateMapper.toEntity(request, brand, category, imageUrl);
+        ProductEntity product = productCreateMapper.toEntity(request, brand, category);
 
         // DB 저장
         ProductEntity savedProduct = productRepository.save(product);
+
+        // 이미지 S3 업로드 -> URL
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile file : images) {
+                if (file.isEmpty()) continue;
+
+                String imageUrl = s3Service.uploadFile(PathName.PRODUCT, file);
+
+                // 이미지 엔티티 생성
+                ProductImageEntity newImage = ProductImageEntity.builder()
+                        .product(savedProduct)
+                        .imageUrl(imageUrl)
+                        .build();
+
+                // Entity 리스트에 추가
+                savedProduct.getImages().add(newImage);
+            }
+        }
+
+        productRepository.flush();
 
         // 로그에 저장
         log.info("새로운 상품 등록 완료: {}", savedProduct.getProductId());
@@ -85,7 +104,8 @@ public class ProductService {
 
         // Entity -> DTO 변환
         return productList.stream()
-                .map(productReadMapper::toResponse).collect(Collectors.toList());
+                .map(productReadMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     // 상품 상세 조회
@@ -100,7 +120,6 @@ public class ProductService {
     }
 
     // 상품 삭제
-    @Transactional
     public void deleteProduct(Long productId) {
 
         // 상품 조회
@@ -108,24 +127,79 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         // 이미지가 있으면 S3에서 삭제
-        if (product.getImage() != null) {
-            try {
-                String imageUrl = product.getImage();
-                String splitStr = ".com/"; // product/랜덤UUID만 추출
-
-                // .com 뒤에 있는 문자열 추출
-                String keyName = imageUrl.substring(imageUrl.lastIndexOf(splitStr) + splitStr.length());
-
-                s3Service.deleteFile(keyName);
-            }
-            catch (Exception e) {
-                log.error("S3 이미지 삭제 실패: {}", e.getMessage());
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            for (ProductImageEntity image : product.getImages()) {
+                s3Service.deleteFileUrl(image.getImageUrl());
             }
         }
 
-        // 상품 삭제
+        // 상품 삭제 (이미지도 cascade + orphanRemoval 로 자동 삭제)
         productRepository.delete(product);
 
         log.info("상품 및 이미지 삭제 완료: {}", productId);
+    }
+
+    // 상품 수정
+    public ProductUpdateResponse updateProduct(Long productId, ProductUpdateRequest request, List<MultipartFile> newImages) {
+
+        // 상품 조회
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+        // 브랜드 조회
+        BrandEntity brand = null;
+        if (request.getBrandId() != null) {
+            brand = brandRepository.findById(request.getBrandId())
+                    .orElseThrow(() -> new CustomException(ProductErrorCode.BRAND_NOT_FOUND));
+        }
+
+        // 카테고리 조회
+        CategoryEntity category = null;
+        if (request.getCategoryId() != null) {
+            category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
+        }
+
+        // 텍스트 정보 업데이트
+        product.update(
+                request.getProductName(),
+                request.getProductContent(),
+                request.getPrice(),
+                request.getStock(),
+                request.getGender(),
+                brand,
+                category
+        );
+
+        // 이미지 삭제
+        if (request.getDeletedImageUrls() != null && !request.getDeletedImageUrls().isEmpty()) {
+
+            product.getImages().removeIf(image ->
+                    request.getDeletedImageUrls().contains(image.getImageUrl())
+            );
+
+            for (String imageUrl : request.getDeletedImageUrls()) {
+                s3Service.deleteFileUrl(imageUrl);
+            }
+        }
+
+        // 이미지 추가
+        if (newImages != null && !newImages.isEmpty()) {
+            for (MultipartFile file : newImages) {
+                if (file.isEmpty()) continue;
+
+                String newImageUrl = s3Service.uploadFile(PathName.PRODUCT, file);
+
+                ProductImageEntity newImage = ProductImageEntity.builder()
+                        .product(product)
+                        .imageUrl(newImageUrl)
+                        .build();
+
+                product.getImages().add(newImage);
+            }
+        }
+
+        // 반환
+        return productUpdateMapper.toUpdateResponse(product);
     }
 }
