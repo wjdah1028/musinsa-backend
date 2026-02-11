@@ -5,6 +5,7 @@ import com.shopping.musinsabackend.domain.cart.dto.response.CartItemCreateRespon
 import com.shopping.musinsabackend.domain.cart.service.CartService;
 import com.shopping.musinsabackend.domain.user.entity.UserEntity;
 import com.shopping.musinsabackend.global.response.BaseResponse;
+import com.shopping.musinsabackend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/carts")
+@Slf4j
 @Tag(name = "Cart", description = "장바구니 API")
 public class CartController {
 
@@ -28,8 +30,13 @@ public class CartController {
     @Operation(summary = "장바구니 상품 추가", description = "상품을 장바구니에 담는 API")
     @PostMapping("/contain-cart")
     public ResponseEntity<BaseResponse<CartItemCreateResponse>> containCart(
-            @AuthenticationPrincipal UserEntity user,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid CartItemCreateRequest request) {
+
+        // CustomUserDetails에서 사용자 꺼냄
+        UserEntity user = userDetails.getUser();
+
+        log.info("로그인 유저 ID 확인: {}", user.getUserId());
 
         // 서비스 호출
         CartItemCreateResponse cartItemCreateResponse = cartService.addCart(user, request);
