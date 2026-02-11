@@ -21,11 +21,11 @@ public class ProductCreateRequest {
 
     @Schema(description = "상품 가격", example = "29900")
     @NotNull(message = "상품 가격은 필수 입력 값입니다.")
-    private int price;
+    private Integer price;
 
     @Schema(description = "상품 재고", example = "150")
     @NotNull(message = "상품 재고는 필수 입력 값입니다.")
-    private int stock;
+    private Integer stock;
 
     @Schema(description = "상품 추천 성별", example = "MAN")
     @NotNull(message = "상품 추천 성별은 필수 입력 값입니다.")
