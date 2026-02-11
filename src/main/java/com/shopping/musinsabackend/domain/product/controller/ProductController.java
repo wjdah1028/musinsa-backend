@@ -1,18 +1,18 @@
 package com.shopping.musinsabackend.domain.product.controller;
 
 import com.shopping.musinsabackend.domain.product.dto.request.ProductCreateRequest;
+import com.shopping.musinsabackend.domain.product.dto.request.ProductUpdateRequest;
 import com.shopping.musinsabackend.domain.product.dto.response.ProductCreateResponse;
 import com.shopping.musinsabackend.domain.product.dto.response.ProductReadResponse;
+import com.shopping.musinsabackend.domain.product.dto.response.ProductUpdateResponse;
 import com.shopping.musinsabackend.domain.product.service.ProductService;
 import com.shopping.musinsabackend.global.response.BaseResponse;
-import com.shopping.musinsabackend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,11 +30,11 @@ public class ProductController {
     @PostMapping(value = "/create-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<ProductCreateResponse>> createProduct(
             @RequestPart(value = "data") @Valid ProductCreateRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
 
         // 서비스 호출
-        ProductCreateResponse response = productService.createProduct(request, image);
+        ProductCreateResponse response = productService.createProduct(request, images);
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "상품 등록 성공", response));
@@ -71,5 +71,20 @@ public class ProductController {
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "상품 삭제가 성공했습니다.", null));
+    }
+
+    @Operation(summary = "상품 수정 API")
+    @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BaseResponse<ProductUpdateResponse>> updateProduct(
+            @PathVariable Long productId,
+            @RequestPart(value = "data") @Valid ProductUpdateRequest request, // 수정할 텍스트 정보 + 삭제할 이미지 URL들
+            @RequestPart(value = "images", required = false) List<MultipartFile> newImages // 새로 추가할 이미지들
+    ) {
+
+        // 서비스 호출
+        ProductUpdateResponse response = productService.updateProduct(productId, request, newImages);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "상품 수정 성공", response));
     }
 }
