@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,16 +25,16 @@ public class ProductCreateResponse {
     private String productContent;
 
     @Schema(description = "상품 가격", example = "29900")
-    private int price;
+    private Integer price;
 
     @Schema(description = "상품 재고", example = "150")
-    private int stock;
+    private Integer stock;
 
     @Schema(description = "상품 추천 성별", example = "MAN")
     private Gender gender;
 
     @Schema(description = "상품 이미지 URL", example = "https://s3...")
-    private String imageUrl;
+    private List<String> imageUrls;
 
     @Schema(description = "상품 리뷰 개수", example = "0")
     private int reviewCount;
