@@ -60,4 +60,27 @@ public class CartController {
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "장바구니 상품 조회 성공", responseList));
     }
+
+    @Operation(summary = "장바구니 개별 삭제", description = "장바구니 개별 삭제하는 API")
+    @DeleteMapping("/remove-cart/{cartItemId}")
+    public ResponseEntity<BaseResponse<Void>> removeCartItem(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long cartItemId
+    ) {
+        cartService.deleteCartItem(userDetails.getUser(), cartItemId);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "아이템 개별 삭제 성공", null));
+    }
+
+    @Operation(summary = "장바구니 전체 삭제", description = "장바구니 전체 삭제하는 API")
+    @DeleteMapping("/remove-cart")
+    public ResponseEntity<BaseResponse<Void>> removeAllCart(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        cartService.deleteAllCartItems(userDetails.getUser());
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "장바구니 비우기 성공", null));
+    }
 }
