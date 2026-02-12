@@ -89,4 +89,19 @@ public class OrderService {
         // 반환
         return orderCreateMapper.toResponse(order);
     }
+
+    // 주문 상세 조회
+    public OrderDetailResponse getOrderDetail(Long orderId, UserEntity user) {
+
+        // 주문 조회
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        if (!order.getUser().getUserId().equals(user.getUserId())) {
+            throw new CustomException(OrderErrorCode.ORDER_NOT_USER);
+        }
+
+        // 반환
+        return orderCreateMapper.toResponse(order);
+    }
 }
