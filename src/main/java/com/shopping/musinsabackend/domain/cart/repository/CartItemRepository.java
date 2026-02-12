@@ -15,4 +15,10 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, Long> 
 
     // 장바구니 전체 확인
     List<CartItemEntity> findByCart(CartEntity cart);
+
+    // 장바구니 개별 삭제
+    void deleteByCartAndCartItemId(CartEntity cart, Long cartItemId);
+
+    // 장바구니 전체 삭제
+    void deleteByCart(CartEntity cart);
 }
