@@ -53,11 +53,11 @@ public class ProductEntity extends BaseTimeEntity {
     private List<ProductImageEntity> images = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "brandId", nullable = false)
+    @JoinColumn(name = "brand_id", nullable = false)
     private BrandEntity brand;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoryId", nullable = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
     public void update(String productName, String productContent, Integer price, Integer stock, Gender gender, BrandEntity brand, CategoryEntity category) {
@@ -82,5 +82,13 @@ public class ProductEntity extends BaseTimeEntity {
         if (category != null) {
             this.category = category;
         }
+    }
+
+    public void removeStock(int count) {
+        int restStock = this.stock - count;
+        if (restStock < 0) {
+            throw new IllegalStateException("재고가 부족합니다.");
+        }
+        this.stock = restStock;
     }
 }
