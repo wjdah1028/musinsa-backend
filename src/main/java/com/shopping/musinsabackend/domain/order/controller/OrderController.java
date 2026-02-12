@@ -1,7 +1,7 @@
 package com.shopping.musinsabackend.domain.order.controller;
 
 import com.shopping.musinsabackend.domain.order.dto.request.OrderCreateRequest;
-import com.shopping.musinsabackend.domain.order.dto.response.OrderCreateResponse;
+import com.shopping.musinsabackend.domain.order.dto.response.OrderDetailResponse;
 import com.shopping.musinsabackend.domain.order.service.OrderService;
 import com.shopping.musinsabackend.domain.user.entity.UserEntity;
 import com.shopping.musinsabackend.global.response.BaseResponse;
@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +29,7 @@ public class OrderController {
 
     @Operation(summary = "주문 생성", description = "상품 주문하는 API")
     @PostMapping("/order-create")
-    public ResponseEntity<BaseResponse<OrderCreateResponse>> createOrder(
+    public ResponseEntity<BaseResponse<OrderDetailResponse>> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid OrderCreateRequest request
     ) {
@@ -41,7 +40,7 @@ public class OrderController {
         log.info("주문 요청 들어옴 - User: {}", user.getEmail());
 
         // 서비스 호출
-        OrderCreateResponse response = orderService.createOrder(user, request);
+        OrderDetailResponse response = orderService.createOrder(user, request);
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "상품 주문에 성공했습니다.", response));

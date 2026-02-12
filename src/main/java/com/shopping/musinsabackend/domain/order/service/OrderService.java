@@ -2,7 +2,7 @@ package com.shopping.musinsabackend.domain.order.service;
 
 import com.shopping.musinsabackend.domain.order.dto.request.OrderCreateRequest;
 import com.shopping.musinsabackend.domain.order.dto.request.OrderProductDto;
-import com.shopping.musinsabackend.domain.order.dto.response.OrderCreateResponse;
+import com.shopping.musinsabackend.domain.order.dto.response.OrderDetailResponse;
 import com.shopping.musinsabackend.domain.order.entity.OrderEntity;
 import com.shopping.musinsabackend.domain.order.entity.OrderItemEntity;
 import com.shopping.musinsabackend.domain.order.entity.OrderStatus;
@@ -35,7 +35,7 @@ public class OrderService {
 
     // 주문 생성 로직
     @Transactional
-    public OrderCreateResponse createOrder(UserEntity user, OrderCreateRequest request) {
+    public OrderDetailResponse createOrder(UserEntity user, OrderCreateRequest request) {
 
         // 주문할 상품 리스트 생성
         List<OrderItemEntity> orderItems = new ArrayList<>();
