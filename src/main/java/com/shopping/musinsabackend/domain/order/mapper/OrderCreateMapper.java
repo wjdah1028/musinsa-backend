@@ -1,6 +1,6 @@
 package com.shopping.musinsabackend.domain.order.mapper;
 
-import com.shopping.musinsabackend.domain.order.dto.response.OrderCreateResponse;
+import com.shopping.musinsabackend.domain.order.dto.response.OrderDetailResponse;
 import com.shopping.musinsabackend.domain.order.dto.response.OrderItemResponse;
 import com.shopping.musinsabackend.domain.order.entity.OrderEntity;
 import com.shopping.musinsabackend.domain.order.entity.OrderItemEntity;
@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 public class OrderCreateMapper {
 
     // 주문 전체 Entity -> Resposnse DTO
-    public OrderCreateResponse toResponse(OrderEntity order) {
+    public OrderDetailResponse toResponse(OrderEntity order) {
 
         // 주문 안에 있는 상품 리스트를 하나씩 DTO로 변환
         List<OrderItemResponse> orderItemResponses = order.getOrderItems().stream().map(this::toOrderItemResponse).collect(Collectors.toList());
         
-        return OrderCreateResponse.builder()
+        return OrderDetailResponse.builder()
                 .orderId(order.getOrderId())
                 .orderStatus(order.getOrderStatus())
                 .orderAt(order.getOrderAt())

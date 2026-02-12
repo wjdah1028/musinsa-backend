@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(title = "주문내역 응답 DTO")
-public class OrderCreateResponse {
+public class OrderDetailResponse {
 
     @Schema(description = "주문 고유번호", example = "1")
     private Long orderId;

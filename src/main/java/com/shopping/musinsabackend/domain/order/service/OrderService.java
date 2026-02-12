@@ -2,7 +2,8 @@ package com.shopping.musinsabackend.domain.order.service;
 
 import com.shopping.musinsabackend.domain.order.dto.request.OrderCreateRequest;
 import com.shopping.musinsabackend.domain.order.dto.request.OrderProductDto;
-import com.shopping.musinsabackend.domain.order.dto.response.OrderCreateResponse;
+import com.shopping.musinsabackend.domain.order.dto.response.OrderDetailResponse;
+import com.shopping.musinsabackend.domain.order.dto.response.OrderPastResponse;
 import com.shopping.musinsabackend.domain.order.entity.OrderEntity;
 import com.shopping.musinsabackend.domain.order.entity.OrderItemEntity;
 import com.shopping.musinsabackend.domain.order.entity.OrderStatus;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class OrderService {
 
     // 주문 생성 로직
     @Transactional
-    public OrderCreateResponse createOrder(UserEntity user, OrderCreateRequest request) {
+    public OrderDetailResponse createOrder(UserEntity user, OrderCreateRequest request) {
 
         // 주문할 상품 리스트 생성
         List<OrderItemEntity> orderItems = new ArrayList<>();
@@ -88,5 +90,30 @@ public class OrderService {
 
         // 반환
         return orderCreateMapper.toResponse(order);
+    }
+
+    // 주문 상세 조회
+    public OrderDetailResponse getOrderDetail(Long orderId, UserEntity user) {
+
+        // 주문 조회
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        if (!order.getUser().getUserId().equals(user.getUserId())) {
+            throw new CustomException(OrderErrorCode.ORDER_NOT_USER);
+        }
+
+        // 반환
+        return orderCreateMapper.toResponse(order);
+    }
+
+    // 사용자 주문 목록 조회
+    public List<OrderPastResponse> getOrderList(UserEntity user) {
+
+        // 해당 사용자 주문 최신으로 가져오기
+        List<OrderEntity> orders = orderRepository.findAllByUserOrderByOrderAtDesc(user);
+
+        // 반환
+        return orders.stream().map(OrderPastResponse::from).collect(Collectors.toList());
     }
 }
