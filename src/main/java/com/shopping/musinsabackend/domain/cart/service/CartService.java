@@ -18,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -57,5 +60,24 @@ public class CartService {
 
         // 반환
         return cartCreateMapper.toResponse(cartItem);
+    }
+
+    // 장바구니 조회
+    public List<CartItemCreateResponse> getCartList(UserEntity user) {
+
+        // 해당 유저 장바구니 조회
+        CartEntity cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(CartErrorCode.CART_NOT_FOUND));
+
+        // 장바구니에 담긴 아이템 조회
+        List<CartItemEntity> cartItems = cartItemRepository.findByCart(cart);
+
+        // 장바구니가 비어있으면 예외 메시지 출력
+        if (cartItems.isEmpty()) {
+            throw new CustomException(CartErrorCode.EMPTY_CART);
+        }
+
+        // Entity -> DTO 변환
+        return cartItems.stream().map(cartCreateMapper::toResponse).collect(Collectors.toList());
     }
 }
