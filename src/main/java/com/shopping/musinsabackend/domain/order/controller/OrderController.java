@@ -2,6 +2,7 @@ package com.shopping.musinsabackend.domain.order.controller;
 
 import com.shopping.musinsabackend.domain.order.dto.request.OrderCreateRequest;
 import com.shopping.musinsabackend.domain.order.dto.response.OrderDetailResponse;
+import com.shopping.musinsabackend.domain.order.dto.response.OrderPastResponse;
 import com.shopping.musinsabackend.domain.order.service.OrderService;
 import com.shopping.musinsabackend.domain.user.entity.UserEntity;
 import com.shopping.musinsabackend.global.response.BaseResponse;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,5 +59,19 @@ public class OrderController {
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "주문 상세 조회 성공", response));
+    }
+
+    @Operation(summary = "주문 전체 조회", description = "주문 전체 조회 API")
+    @GetMapping("/order-all")
+    public ResponseEntity<BaseResponse<List<OrderPastResponse>>> getOrderList(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        UserEntity user = userDetails.getUser();
+
+        // 서비스 호출
+        List<OrderPastResponse> response = orderService.getOrderList(user);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "주문 목록 조회 성공", response));
     }
 }
