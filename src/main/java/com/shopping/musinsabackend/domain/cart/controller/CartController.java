@@ -1,6 +1,7 @@
 package com.shopping.musinsabackend.domain.cart.controller;
 
 import com.shopping.musinsabackend.domain.cart.dto.request.CartItemCreateRequest;
+import com.shopping.musinsabackend.domain.cart.dto.request.CartItemUpdateRequest;
 import com.shopping.musinsabackend.domain.cart.dto.response.CartItemCreateResponse;
 import com.shopping.musinsabackend.domain.cart.service.CartService;
 import com.shopping.musinsabackend.domain.user.entity.UserEntity;
@@ -82,5 +83,21 @@ public class CartController {
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "장바구니 비우기 성공", null));
+    }
+
+    @Operation(summary = "장바구니 수정", description = "장바구니 수량 수정하는 API")
+    @PutMapping("/{cartItemId}")
+    public ResponseEntity<BaseResponse<Void>> updateCartItem(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long cartItemId,
+            @RequestBody @Valid CartItemUpdateRequest request
+    ) {
+        UserEntity user = userDetails.getUser();
+
+        // 서비스 호출
+        cartService.updateCartItemCount(user, cartItemId, request);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "상품 수량 변경 성공", null));
     }
 }

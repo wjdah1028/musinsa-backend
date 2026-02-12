@@ -1,6 +1,7 @@
 package com.shopping.musinsabackend.domain.cart.service;
 
 import com.shopping.musinsabackend.domain.cart.dto.request.CartItemCreateRequest;
+import com.shopping.musinsabackend.domain.cart.dto.request.CartItemUpdateRequest;
 import com.shopping.musinsabackend.domain.cart.dto.response.CartItemCreateResponse;
 import com.shopping.musinsabackend.domain.cart.entity.CartEntity;
 import com.shopping.musinsabackend.domain.cart.entity.CartItemEntity;
@@ -114,5 +115,26 @@ public class CartService {
 
         // 전체 삭제
         cartItemRepository.deleteByCart(cart);
+    }
+
+    // 장바구니 상품 수정
+    @Transactional
+    public void updateCartItemCount(UserEntity user, Long cartItemId, CartItemUpdateRequest request) {
+
+        // 해당 유저 장바구니 조회
+        CartEntity cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(CartErrorCode.CART_NOT_FOUND));
+
+        // 장바구니에 담긴 상품 조회
+        CartItemEntity cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new CustomException(CartErrorCode.ITEM_NOT_FOUND));
+
+        // 해당 유저의 장바구니 상품인지 확인
+        if (!cartItem.getCart().getCartId().equals(cart.getCartId())) {
+            throw new CustomException(CartErrorCode.INVALID_USER);
+        }
+
+        // 수량 업데이트
+        cartItem.updateCount(request.getItemCount());
     }
 }

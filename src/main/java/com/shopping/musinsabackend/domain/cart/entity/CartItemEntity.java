@@ -33,4 +33,9 @@ public class CartItemEntity {
     public void addCount(Integer itemCount) {
         this.itemCount += itemCount;
     }
+
+    // 수량 바꿔주는 메서드
+    public void updateCount(Integer itemCount) {
+        this.itemCount = itemCount;
+    }
 }

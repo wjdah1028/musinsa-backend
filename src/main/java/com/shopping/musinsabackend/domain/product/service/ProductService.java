@@ -129,7 +129,12 @@ public class ProductService {
         // 이미지가 있으면 S3에서 삭제
         if (product.getImages() != null && !product.getImages().isEmpty()) {
             for (ProductImageEntity image : product.getImages()) {
-                s3Service.deleteFileUrl(image.getImageUrl());
+                try {
+                    s3Service.deleteFile(image.getImageUrl());
+                }
+                catch (Exception e) {
+                    log.warn("S3에서 파일 삭제 실패: {}", e.getMessage());
+                }
             }
         }
 
