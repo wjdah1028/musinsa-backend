@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,5 +41,20 @@ public class OrderController {
 
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "상품 주문에 성공했습니다.", response));
+    }
+
+    @Operation(summary = "주문 상세 조회", description = "주문 상세 조회 API")
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<BaseResponse<OrderDetailResponse>> getOrderDetail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable @Valid Long orderId
+    ) {
+        UserEntity user = userDetails.getUser();
+
+        // 서비스 호출
+        OrderDetailResponse response = orderService.getOrderDetail(orderId, user);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "주문 상세 조회 성공", response));
     }
 }
