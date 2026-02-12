@@ -80,4 +80,39 @@ public class CartService {
         // Entity -> DTO 변환
         return cartItems.stream().map(cartCreateMapper::toResponse).collect(Collectors.toList());
     }
+
+    // 장바구니 개별 상품 삭제
+    @Transactional
+    public void deleteCartItem(UserEntity user, Long cartItemId) {
+
+        // 해당 유저 장바구니 조회
+        CartEntity cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(CartErrorCode.CART_NOT_FOUND));
+
+        // 사용자의 장바구니에 해당 상품이 있는지 확인
+        CartItemEntity cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new CustomException(CartErrorCode.ITEM_NOT_FOUND));
+
+        // 상품의 장바구니 ID와 사용자의 장바구니 ID가 일치하는지 확인
+        if (!cartItem.getCart().getCartId().equals(cart.getCartId())) {
+            throw new CustomException(CartErrorCode.INVALID_USER);
+        }
+
+        // 삭제
+        cartItemRepository.delete(cartItem);
+
+        log.info("장바구니 아이템 삭제 완료: 아이템 ID {}", cartItemId);
+    }
+
+    // 장바구니 상품 전체 삭제
+    @Transactional
+    public void deleteAllCartItems(UserEntity user) {
+
+        // 해당 유저 장바구니 조회
+        CartEntity cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(CartErrorCode.CART_NOT_FOUND));
+
+        // 전체 삭제
+        cartItemRepository.deleteByCart(cart);
+    }
 }
