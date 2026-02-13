@@ -74,4 +74,14 @@ public class OrderController {
         // 응답 반환
         return ResponseEntity.ok(BaseResponse.success(200, "주문 목록 조회 성공", response));
     }
+
+    @Operation(summary = "주문 취소", description = "주문 취소하는 API")
+    @DeleteMapping("/order-cancel/{orderId}")
+    public ResponseEntity<BaseResponse<Void>> cancelOrder(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable @Valid Long orderId
+    ) {
+        orderService.cancelOrder(orderId, userDetails.getUser());
+        return ResponseEntity.ok(BaseResponse.success(200, "주문 취소 완료", null));
+    }
 }

@@ -37,4 +37,8 @@ public class OrderItemEntity extends BaseTimeEntity {
     public void setOrder(OrderEntity order) {
         this.order = order;
     }
+
+    public void cancel() {
+        getProduct().addStock(this.orderCount);
+    }
 }

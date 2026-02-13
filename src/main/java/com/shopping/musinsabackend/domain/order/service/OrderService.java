@@ -116,4 +116,21 @@ public class OrderService {
         // 반환
         return orders.stream().map(OrderPastResponse::from).collect(Collectors.toList());
     }
+
+    // 주문 취소
+    @Transactional
+    public void cancelOrder(Long orderId, UserEntity user) {
+
+        // 주문 조회
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        // 사용자의 주문인지 확인
+        if (!order.getUser().getUserId().equals(user.getUserId())) {
+            throw new CustomException(OrderErrorCode.ORDER_NOT_USER);
+        }
+
+        // 주문 취소
+        order.cancel();
+    }
 }

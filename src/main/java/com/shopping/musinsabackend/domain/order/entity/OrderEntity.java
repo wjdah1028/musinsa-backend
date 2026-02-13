@@ -1,7 +1,9 @@
 package com.shopping.musinsabackend.domain.order.entity;
 
+import com.shopping.musinsabackend.domain.order.exception.OrderErrorCode;
 import com.shopping.musinsabackend.domain.user.entity.UserEntity;
 import com.shopping.musinsabackend.global.common.BaseTimeEntity;
+import com.shopping.musinsabackend.global.exception.CustomException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,5 +60,22 @@ public class OrderEntity extends BaseTimeEntity {
 
     public void updateTotalPrice(Integer totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    // 배송 취소하면 재고 다시 추가
+    public void cancel() {
+
+        // 취소된 주문인지 확인
+        if (this.orderStatus == OrderStatus.CANCEL) {
+            throw new CustomException(OrderErrorCode.ALREADY_CANCEL);
+        }
+
+        // 주문 상태 변경
+        this.orderStatus = OrderStatus.CANCEL;
+
+        // 재고 추가
+        for (OrderItemEntity orderItem : orderItems) {
+            orderItem.cancel();
+        }
     }
 }
