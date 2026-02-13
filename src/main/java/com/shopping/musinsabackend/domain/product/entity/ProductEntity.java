@@ -91,4 +91,8 @@ public class ProductEntity extends BaseTimeEntity {
         }
         this.stock = restStock;
     }
+
+    public void addStock(int count) {
+        this.stock += count;
+    }
 }
