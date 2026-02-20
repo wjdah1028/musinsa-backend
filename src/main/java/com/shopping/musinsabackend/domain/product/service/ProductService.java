@@ -138,7 +138,7 @@ public class ProductService {
             }
         }
 
-        // 상품 삭제 (이미지도 cascade + orphanRemoval 로 자동 삭제)
+        // 상품 삭제
         productRepository.delete(product);
 
         log.info("상품 및 이미지 삭제 완료: {}", productId);

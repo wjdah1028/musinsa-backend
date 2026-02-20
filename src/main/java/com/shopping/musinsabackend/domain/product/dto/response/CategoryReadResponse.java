@@ -23,5 +23,5 @@ public class CategoryReadResponse {
     private Integer depth;
 
     @Schema(description = "자식 카테고리 리스트")
-    private List<CategoryReadResponse> children; // 자기 자신을 리스트로!
+    private List<CategoryReadResponse> children;
 }

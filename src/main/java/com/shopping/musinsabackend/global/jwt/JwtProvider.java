@@ -39,10 +39,10 @@ public class JwtProvider {
         this.refreshTokenExpireTime = refreshTokenExpireTime;
     }
 
-    // 1. 액세스 토큰 생성 (참고 코드 스타일)
+    // 액세스 토큰 생성
     public String createAccessToken(String username, String role, String provider) {
         Date now = new Date();
-        Claims claims = Jwts.claims().setSubject(username).setId(username); // 참고 코드: id에도 username 저장
+        Claims claims = Jwts.claims().setSubject(username).setId(username);
         claims.put("roles", role);
         claims.put("provider", provider);
 
@@ -54,7 +54,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    // 2. 리프레시 토큰 생성 (참고 코드 스타일)
+    // 리프레시 토큰 생성
     public String createRefreshToken(String username, String tokenId) {
         Date now = new Date();
         return Jwts.builder()
@@ -66,17 +66,17 @@ public class JwtProvider {
                 .compact();
     }
 
-    // 3. 토큰 정보를 쿠키에 저장 (참고 코드 스타일)
+    // 토큰 정보를 쿠키에 저장
     public void addJwtToCookie(HttpServletResponse response, String token, String name, long maxAge) {
         Cookie cookie = new Cookie(name, token);
         cookie.setHttpOnly(true);
-        // cookie.setSecure(true); // HTTPS 환경에서만 전송되게 (개발 중엔 주석)
+        // cookie.setSecure(true); // HTTPS 환경에서만 전송되게함
         cookie.setPath("/");
         cookie.setMaxAge((int) maxAge / 1000); // 단위: 초
         response.addCookie(cookie);
     }
 
-    // 4. 토큰 유효성 검증 (CustomException 사용)
+    // 토큰 유효성 검증
     public boolean validateToken(String token) {
         try {
             parseClaims(token);
@@ -94,7 +94,7 @@ public class JwtProvider {
         }
     }
 
-    // 5. 남은 만료 시간 가져오기
+    // 남은 만료 시간 가져오기
     public long getExpiration(String accessToken) {
         Claims claims = parseClaims(accessToken);
         Date expiration = claims.getExpiration();
