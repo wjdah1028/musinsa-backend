@@ -20,6 +20,7 @@ public class MyPageService {
 
     private final OrderRepository orderRepository;
     private final MyPageMapper myPageMapper;
+    private final OpenAiService openAiService;
 
     @Transactional
     public MyPageResponse myPage(UserEntity user) {
@@ -27,7 +28,10 @@ public class MyPageService {
         // 유저 주문내역 가져오기
         List<OrderEntity> orders = orderRepository.findAllByUserOrderByOrderAtDesc(user);
 
+        // AI에게 추천 멘트 받기
+        String aiMessage = openAiService.getRecommendation(orders);
+
         // 반환
-        return myPageMapper.toResponse(user, orders);
+        return myPageMapper.toResponse(user, orders, aiMessage);
     }
 }
