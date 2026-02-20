@@ -33,7 +33,7 @@ public class CategoryController {
         return ResponseEntity.ok(BaseResponse.success(200, "카테고리 등록 성공", categoryCreateResponse));
     }
 
-    // 2. 카테고리 전체 조회 (이게 없어서 조회를 못하셨던 겁니다!)
+    // 카테고리 전체 조회
     @Operation(summary = "카테고리 전체 조회")
     @GetMapping // GET 요청을 받습니다.
     public ResponseEntity<List<CategoryReadResponse>> getCategoryList() {

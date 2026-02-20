@@ -31,32 +31,30 @@ public class SecurityConfig {
     private final CorsConfig corsConfig;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // 👇 아직 파일이 없으므로 주석 처리 (나중에 소셜 로그인 구현 시 주석 해제)
     // private final CustomOAuth2UserService oauth2UserService;
     // private final OAuth2LoginSuccessHandler customSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CSRF 해제 (JWT 사용 시 필요 없음)
+                // CSRF 해제
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 2. CORS 설정 (CorsConfig 파일 사용)
+                // CORS 설정
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
 
-                // 3. HTTP Basic 인증 설정 (필요 시 유지, 안 쓰면 disable 해도 됨)
+                // HTTP Basic 인증 설정
                 .httpBasic(AbstractHttpConfigurer::disable)
 
-                // 4. ★ 세션 사용 안 함 설정 (JWT 핵심!) ★
-                // 서버가 세션을 생성하지도 않고, 기존 세션을 사용하지도 않음 -> 완전한 Stateless
+                // 세션 사용 안 함 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 5. 요청 URL별 권한 설정
+                // 요청 URL별 권한 설정
                 .authorizeHttpRequests(request -> request
                         // Swagger 허용
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        // AuthController 허용 (로그인 등)
+                        // AuthController 허용
                         .requestMatchers("/api/auths/**").permitAll()
 
                         // UserController의 회원가입 주소 허용
@@ -66,10 +64,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // 6. JWT 필터 등록 (UsernamePasswordFilter 앞에 실행)
+                // JWT 필터 등록
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // 7. OAuth2 로그인 설정 (나중에 구현 시 주석 해제)
+        // OAuth2 로그인 설정
             /*
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService)) // 사용자 정보 처리

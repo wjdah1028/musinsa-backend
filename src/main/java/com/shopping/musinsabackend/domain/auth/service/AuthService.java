@@ -30,37 +30,35 @@ public class AuthService {
     // 로그인 로직
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
-        // 1. 유저 확인
-        // 🚨 수정됨: User -> UserEntity
+        // 유저 확인
         UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
-        // 2. 인증 토큰 생성 (ID/PW)
+        // 인증 토큰 생성 (ID/PW)
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(), loginRequest.getPassword());
 
-        // 3. 인증 처리 (여기서 비밀번호 검증이 일어남)
+        // 인증 처리
         authenticationManager.authenticate(authenticationToken);
 
-        // 4. 액세스 토큰 및 리프레시 토큰 발급
-        // 🚨 수정됨: user.getRole()이 Enum이면 .toString() 붙이기, 아니면 그대로 사용
+        // 액세스 토큰 및 리프레시 토큰 발급
         String accessToken = jwtProvider.createAccessToken(
                 user.getEmail(), user.getRole().toString(), "custom");
 
         String refreshToken = jwtProvider.createRefreshToken(
                 user.getEmail(), UUID.randomUUID().toString());
 
-        // 5. 리프레시 토큰 DB에 저장 (UserEntity 엔티티에 메서드 필요)
+        // 리프레시 토큰 DB에 저장
         user.createRefreshToken(refreshToken);
 
-        // 6. Access Token의 만료 시간을 가져옴
+        // Access Token의 만료 시간을 가져옴
         Long expirationTime = jwtProvider.getExpiration(accessToken);
 
-        // 7. 로그인 성공 로깅
+        // 로그인 성공 로깅
         log.info("로그인 성공: {}", user.getEmail());
 
-        // 8. 로그인 응답 반환
+        // 로그인 응답 반환
         return authMapper.toLoginResponse(user, accessToken, expirationTime);
     }
 

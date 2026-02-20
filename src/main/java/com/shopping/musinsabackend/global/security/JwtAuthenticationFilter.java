@@ -28,23 +28,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. 토큰 추출 시도
+        // 토큰 추출 시도
         String token = resolveToken(request);
         log.info("1. 필터 시작 - 요청 URL: {}, 토큰 존재 여부: {}", request.getRequestURI(), (token != null));
 
         try {
-            // 2. 토큰 유효성 검사
+            // 토큰 유효성 검사
             if (token != null && jwtProvider.validateToken(token)) {
 
-                // 3. 이메일 추출
+                // 이메일 추출
                 String email = jwtProvider.extractSocialId(token);
                 log.info("2. 토큰 검증 성공 - 추출된 이메일: {}", email);
 
-                // 4. DB 조회
+                // DB 조회
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 log.info("3. DB 유저 조회 성공 - 권한: {}", userDetails.getAuthorities());
 
-                // 5. 인증 객체 생성 및 저장
+                // 인증 객체 생성 및 저장
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
@@ -54,9 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.warn("토큰이 없거나 validateToken이 false를 반환함.");
             }
         } catch (Exception e) {
-            // 🚨 여기가 핵심입니다! 어떤 에러가 났는지 로그로 확인해야 합니다.
             log.error("필터 실행 중 에러 발생! 원인: {}", e.getMessage());
-            // 필요하다면 e.printStackTrace()를 통해 상세 에러 확인
         }
 
         filterChain.doFilter(request, response);

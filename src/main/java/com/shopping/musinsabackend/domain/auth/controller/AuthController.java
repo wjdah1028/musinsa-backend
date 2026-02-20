@@ -31,18 +31,17 @@ public class AuthController {
     public ResponseEntity<BaseResponse<LoginResponse>> login(
             @RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
 
-        // 1. 서비스 로직 실행
+        // 서비스 로직 실행
         LoginResponse loginResponse = authService.login(loginRequest);
 
-        // 2. refreshToken 가져오기 (Repository 직접 접근 - 참고 코드 스타일)
+        // refreshToken 가져오기
         String refreshToken = userRepository
                 .findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND))
-                .getRefreshToken(); // User 엔티티에 @Getter가 있어야 함
+                .getRefreshToken();
 
-        // 3. Set-Cookie 설정 (HttpOnly + Secure)
-        // 7일 = 60 * 60 * 24 * 7
-        jwtProvider.addJwtToCookie(response, refreshToken, "refreshToken", 60 * 60 * 24 * 7);
+        // Set-Cookie 설정
+        jwtProvider.addJwtToCookie(response, refreshToken, "refreshToken", 60 * 60 * 24 * 7); // 7일 이라는 뜻
 
         return ResponseEntity.ok(BaseResponse.success(200, "로그인에 성공했습니다.", loginResponse));
     }
