@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Component
 public class MyPageMapper {
 
-    public MyPageResponse toResponse(UserEntity user, List<OrderEntity> orders) {
+    public MyPageResponse toResponse(UserEntity user, List<OrderEntity> orders, String aimessage) {
 
         // 현재 진행중인 주문 개수
         long activeOrder = orders.stream().filter(o -> o.getOrderStatus() == OrderStatus.ORDER).count();
@@ -35,6 +35,7 @@ public class MyPageMapper {
                 .activeOrder(activeOrder)
                 .cancelOrder(cancelOrder)
                 .recentOrder(recentOrder)
+                .aiRecommendation(aimessage)
                 .build();
     }
 }
