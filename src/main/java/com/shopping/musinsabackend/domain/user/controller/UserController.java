@@ -1,0 +1,88 @@
+package com.shopping.musinsabackend.domain.user.controller;
+
+import com.shopping.musinsabackend.domain.user.dto.request.SignUpRequest;
+import com.shopping.musinsabackend.domain.user.dto.request.UpdatePwInfoRequest;
+import com.shopping.musinsabackend.domain.user.dto.request.UpdateUserInfoRequest;
+import com.shopping.musinsabackend.domain.user.dto.response.InfoResponse;
+import com.shopping.musinsabackend.domain.user.dto.response.SignUpResponse;
+import com.shopping.musinsabackend.domain.user.service.UserService;
+import com.shopping.musinsabackend.global.response.BaseResponse;
+import com.shopping.musinsabackend.global.security.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/users")
+@Tag(name = "User", description = "User 관련 API")
+public class UserController {
+
+    private final UserService userService;
+
+    // 회원 가입 API
+    @Operation(summary = "회원가입", description = "사용자 회원가입 API")
+    @PostMapping("/sign-up")
+    public ResponseEntity<BaseResponse<SignUpResponse>> signUp(@RequestBody @Valid SignUpRequest request) {
+
+        // 서비스 호출
+        SignUpResponse signUpResponse = userService.signUp(request);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(201, "회원가입에 성공했습니다.", signUpResponse));
+    }
+
+    // 회원 탈퇴 API
+    @Operation(summary = "회원탈퇴", description = "사용자 탈퇴 API")
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<BaseResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        // 서비스 호출
+        userService.deleteUser(userDetails.getUsername()); // CustomUserDetails를 보면 getUsername()을 호출하면 getEmail이 실행
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "회원 탈퇴가 완료되었습니다.", null));
+    }
+
+    // 회원 정보 조회 API
+    @Operation(summary = "회원 정보 조회", description = "사용자 정보 조회 API")
+    @GetMapping("/my-info")
+    public ResponseEntity<BaseResponse<InfoResponse>> myInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        // 서비스 호출
+        InfoResponse userInfo = userService.infoUser(userDetails.getUsername());
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "내 정보 조회 성공", userInfo));
+    }
+
+    // 회원 정보 수정 API
+    @Operation(summary = "회원 정보 수정", description = "사용자 정보 수정 API")
+    @PatchMapping("/update-info")
+    public ResponseEntity<BaseResponse<Void>> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid UpdateUserInfoRequest request) {
+
+        // 서비스 호출
+        userService.updateUserInfo(userDetails.getUsername(), request);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "회원 정보가 수정되었습니다.", null));
+    }
+
+    // 비밀번호 변경 API
+    @Operation(summary = "비밀번호 수정", description = "사용자 비밀번호 수정 API")
+    @PatchMapping("/update-pw")
+    public ResponseEntity<BaseResponse<Void>> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid UpdatePwInfoRequest request) {
+
+        // 서비스 호출
+        userService.updateUserPw(userDetails.getUsername(), request);
+
+        // 응답 반환
+        return ResponseEntity.ok(BaseResponse.success(200, "비밀번호가 변경되었습니다.", null));
+    }
+}
+
