@@ -31,4 +31,7 @@ public class MyPageResponse {
 
     @Schema(description = "최근 주문 내역")
     private List<OrderPastResponse> recentOrder;
+
+    @Schema(description = "AI 코디 추천")
+    private String aiRecommendation;
 }
