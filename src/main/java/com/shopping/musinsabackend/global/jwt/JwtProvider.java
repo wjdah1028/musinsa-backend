@@ -70,7 +70,7 @@ public class JwtProvider {
     public void addJwtToCookie(HttpServletResponse response, String token, String name, long maxAge) {
         Cookie cookie = new Cookie(name, token);
         cookie.setHttpOnly(true);
-        // cookie.setSecure(true); // HTTPS 환경에서만 전송되게함
+        // cookie.setSecure(true); // HTTPS 환경에서만 전송
         cookie.setPath("/");
         cookie.setMaxAge((int) maxAge / 1000); // 단위: 초
         response.addCookie(cookie);

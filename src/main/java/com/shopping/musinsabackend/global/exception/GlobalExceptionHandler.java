@@ -49,15 +49,15 @@ public class GlobalExceptionHandler {
     // 비밀번호/아이디 불일치 예외 처리
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<BaseResponse<Void>> handleBadCredentialsException() {
-        // 1. 우리가 만든 에러 코드 가져오기
+        // 에러 코드 가져오기
         AuthErrorCode errorCode = AuthErrorCode.INVALID_PASSWORD;
 
-        // 2. BaseResponse 형식으로 변환해서 반환
+        // BaseResponse 형식으로 변환해서 반환
         return ResponseEntity
                 .status(errorCode.getStatus()) // HTTP 상태 코드 (401)
                 .body(BaseResponse.error(
-                        errorCode.getStatus().value(), // 코드 (401)
-                        errorCode.getMessage()         // 메시지 ("아이디 또는 비밀번호가...")
+                        errorCode.getStatus().value(),
+                        errorCode.getMessage()
                 ));
     }
 
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
                 .body(BaseResponse.error(400, "필수 헤더 정보(Authorization)가 누락되었습니다."));
     }
 
-    // JSON 파싱 에러 (아까 대괄호 [] 안 붙였을 때 나는 에러) 전용 처리기
+    // JSON 파싱 에러 전용 처리기
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<Object>> handleHttpMessageNotReadableException(
             org.springframework.http.converter.HttpMessageNotReadableException ex) {

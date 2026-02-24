@@ -33,7 +33,7 @@ public class CorsConfig {
         // 브라우저가 preflight 요청 결과를 캐싱하는 시간
         configuration.setMaxAge(3600L);
 
-        // 모든 경로("/**")에 대해 위 설정을 적용
+        // 모든 경로에 대해 설정을 적용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
