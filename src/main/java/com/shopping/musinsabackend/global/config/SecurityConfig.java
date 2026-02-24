@@ -31,9 +31,6 @@ public class SecurityConfig {
     private final CorsConfig corsConfig;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // private final CustomOAuth2UserService oauth2UserService;
-    // private final OAuth2LoginSuccessHandler customSuccessHandler;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -66,14 +63,6 @@ public class SecurityConfig {
 
                 // JWT 필터 등록
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // OAuth2 로그인 설정
-            /*
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService)) // 사용자 정보 처리
-                .successHandler(customSuccessHandler) // 로그인 성공 후 토큰 발급 처리
-            );
-            */
 
         return http.build();
     }
